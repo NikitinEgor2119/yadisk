@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Яндекс диск скачивание файлов</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <section class="hero">
+        <div class="hero__container container">
+        <h1 class="hero__header1 header-reset">Скачай, файлы с публичной ссылки:</h1>
+        <form class="hero__form1 flex" method="POST">
+            {% csrf_token %}
+            <label class="hero__form1-label" for="public_key">Введите публичный ключ:</label>
+            <input class="hero__form1-text" type="text" id="public_key" name="public_key" required>
+            <button class="hero__form-button btn-reset button-hover" type="submit">Получить данные</button>
+        </form>
+        {% if items %}
+            <h2 class="hero__header2 header-reset">Содержимое публичной ссылки:</h2>
+            <form class="hero__form2 flex" method="POST" action="{% url 'download_selected_files' %}">
+                {% csrf_token %}
+                <ul class="hero__list list-reset">
+                    {% for item in items %}
+                        <li class="hero__list-item">
+                            {% if item.is_image %}
+                                <img class="hero__list-img" src="{{ item.file }}" alt="{{ item.name }}" style="max-width: 200px;">
+                            {% elif item.is_video %}
+                                <video class="hero__list-video" controls style="max-width: 400px;">
+                                    <source src="{{ item.file }}" type="{{ item.mime_type }}">
+                                    Ваш браузер не поддерживает видео.
+                                </video>
+                            {% else %}
+                                <a class="hero__list-link " href="{{ item.file }}" target="_blank">{{ item.name }}</a>
+                            {% endif %}
+                            <input class="hero__list-checkbox" type="checkbox" name="selected_files" value="{{ item.file }}">
+                        </li>
+                    {% endfor %}
+                </ul>
+                <button class="hero__button btn-reset button-hover" type="submit">Скачать выбранные</button>
+            </form>
+        {% else %}
+            <p>Нет доступных элементов.</p>
+        {% endif %}
+
+        {% if error %}
+            <p style="color: red;">Ошибка: {{ error }}</p>
+        {% endif %}
+        </div>
+    </section>
+</body>
+</html>
+
+
